@@ -1,0 +1,59 @@
+services:
+  # Node 1
+  node1:
+    build: . 
+    container_name: node1
+    environment:
+      - NODE_ID=node1 
+      
+      - PEER_NODES=http://node2:5000,http://node3:5000
+    ports:
+      - "5001:5000" 
+    networks:
+      - kv_network 
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s 
+
+  # Node 2
+  node2:
+    build: .
+    container_name: node2
+    environment:
+      - NODE_ID=node2
+      - PEER_NODES=http://node1:5000,http://node3:5000
+    ports:
+      - "5002:5000" 
+    networks:
+      - kv_network
+    healthcheck: 
+      test: ["CMD", "curl", "-f", "http://localhost:5000/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Node 3
+  node3:
+    build: .
+    container_name: node3
+    environment:
+      - NODE_ID=node3
+      - PEER_NODES=http://node1:5000,http://node2:5000
+    ports:
+      - "5003:5000" 
+    networks:
+      - kv_network
+    healthcheck: 
+      test: ["CMD", "curl", "-f", "http://localhost:5000/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  kv_network:
+    driver: bridge 
